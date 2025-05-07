@@ -1,0 +1,334 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500&display=swap');
+
+:root {
+  --primary-color: #1a1a1a;
+  --secondary-color: #4a4a4a;
+  --accent-color: #0077cc;
+  --text-color: #333;
+  --light-gray: #f0f0f0;
+  --border-radius: 8px;
+  --transition-speed: 0.2s;
+  --eye-color: #000;           /* Black eyes in light mode */
+  --eye-reflection: white;     /* White reflection in light mode */
+  --bg-color: white;
+}
+
+body.dark-mode {
+  --primary-color: white;
+  --secondary-color: black;
+  --accent-color: white;
+  --text-color: white;
+  --light-gray: white;
+  --border-radius: 8px;
+  --transition-speed: 0.2s;
+  --eye-color: white;          /* White eyes in dark mode */
+  --eye-reflection: #777;      /* Gray reflection in dark mode */
+  --bg-color: #121212;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Source Code Pro', monospace;
+  color: var(--text-color);
+  padding: 20px;
+  box-sizing: border-box;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+h1 {
+  color: var(--primary-color);
+  margin-bottom: 40px;
+}
+
+.header-controls {
+  position: absolute;
+  top: 20px;
+  width: 90%;
+  max-width: 800px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.control-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.dropdown {
+  position: absolute;
+  top: 40px;
+  background: var(--bg-color);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 100;
+  display: none;
+  min-width: 200px;
+}
+
+.dropdown.show {
+  display: block;
+}
+
+.dropdown-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+  color: var(--text-color);
+}
+
+.dropdown-item:hover {
+  background-color: var(--light-gray);
+}
+
+.dropdown-item.active {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.eyes-container {
+  display: flex;
+  height: 80px;
+  gap: 100px;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.eye {
+  width: 150px;
+  height: 70px;
+  background: var(--eye-color);
+  border-radius: 10px;
+  transition: all var(--transition-speed) ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.eye::before {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: var(--eye-reflection);
+  border-radius: 40%;
+  top: calc(50% + var(--eye-offset-y, 0px));
+  left: calc(50% + var(--eye-offset-x, 0px));
+  transform: translate(-50%, -50%);
+  opacity: 0.2;
+}
+
+.eye.happy::before {
+  border-radius: 0;
+  width: 60px;
+  height: 30px;
+  top: 60%;
+  transform: translate(-50%, 0) rotate(0deg);
+}
+
+.eye.sad::before {
+  border-radius: 0;
+  width: 60px;
+  height: 30px;
+  top: 30%;
+  transform: translate(-50%, 0) rotate(180deg);
+}
+
+.eye.angry::before {
+  border-radius: 0;
+  width: 60px;
+  height: 15px;
+  top: 50%;
+  transform: translate(-50%, 0) rotate(0deg);
+}
+
+.eye.love::before {
+  content: '❤️';
+  font-size: 30px;
+  background: transparent;
+  opacity: 1;
+  width: auto;
+  height: auto;
+}
+
+.eye.waving::before {
+  animation: wave 1s infinite;
+}
+
+@keyframes wave {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+  25% { transform: translate(-50%, -50%) rotate(15deg); }
+  75% { transform: translate(-50%, -50%) rotate(-15deg); }
+}
+
+.eye.touched {
+  animation: eye-flinch 0.3s ease;
+}
+
+@keyframes eye-flinch {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.8); }
+  100% { transform: scale(1); }
+}
+
+.eye.closed {
+  height: 20px;
+  margin-top: 40px;
+  border-radius: 50px;
+}
+
+.chat-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+}
+
+input[type="text"] {
+  padding: 12px 15px;
+  font-size: 1rem;
+  border: none;
+  border-radius: var(--border-radius);
+  width: 100%;
+  transition: border-color 0.2s ease;
+ 
+  color: var(--text-color);
+}
+
+input[type="text"]:focus {
+  outline: none;
+}
+
+button {
+  padding: 12px 20px;
+  font-size: 1rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+button:hover {
+  background-color: var(--secondary-color);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.response {
+  margin-top: 30px;
+  max-width: 500px;
+  text-align: center;
+  padding: 15px;
+  border-radius: var(--border-radius);
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.response b {
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.loading {
+  position: relative;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 10px;
+}
+
+.stop-button {
+  margin-top: 15px;
+  background-color: #ff4444;
+  padding: 8px 15px;
+  font-size: 0.9rem;
+}
+
+.stop-button:hover {
+  background-color: #cc0000;
+}
+
+.menu-content {
+  text-align: left;
+  width: 100%;
+}
+
+.menu-content img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.menu-content button {
+  display: block;
+  width: 100%;
+  margin: 5px 0;
+  text-align: left;
+  padding: 10px;
+  background-color: var(--light-gray);
+  color: var(--text-color);
+}
+
+.menu-content button:hover {
+  background-color: #e0e0e0;
+}
+
+.generated-image {
+  max-width: 100%;
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 600px) {
+  .eyes-container {
+    gap: 50px;
+  }
+  
+  .eye {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .eye.closed {
+    height: 16px;
+    margin-top: 32px;
+  }
+  
+  .chat-box {
+    flex-direction: column;
+  }
+  
+  button {
+    width: 100%;
+  }
+}
