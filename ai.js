@@ -118,7 +118,7 @@ const eye1 = document.getElementById('eye1');
         endpoint: "https://bit-x-apis.vercel.app/dolphin?q=",
         responseType: "text",
         processResponse: function(data) {
-          return replaceAINames(data.result || "");
+          return replaceAINames(data.answer || "");
         }
       },
       notegpt: {
