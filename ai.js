@@ -86,138 +86,62 @@ const eye1 = document.getElementById('eye1');
     };
 
     // AI models configuration with response handling instructions
+    
+  // AI models configuration with response handling instructions
     const aiModels = {
       elixa: {
         name: "Elixa",
-        endpoint: "https://bk9.fun/ai/gemini?q=",
-        responseType: "text", // text, image, or direct
-        responsePath: "BK9", // Path to the response data in JSON
-        processResponse: function(data) {
-          // Default text processing
-          let response = Array.isArray(data[this.responsePath]) ? 
-                         data[this.responsePath].join(" ") : 
-                         data[this.responsePath];
-          return replaceAINames(response);
-        }
-      },
-      gemini: {
-        name: "Gemini",
-        endpoint: "https://bk9.fun/ai/gemini?q=",
+        endpoint: "https://bit-x-apis.vercel.app/talkai?q=",
         responseType: "text",
-        responsePath: "BK9",
         processResponse: function(data) {
-          let response = Array.isArray(data[this.responsePath]) ? 
-                         data[this.responsePath].join(" ") : 
-                         data[this.responsePath];
-          return replaceAINames(response);
+          return replaceAINames(data.result || "");
         }
       },
-      
-      deep: {
-        name: "Deepseek",
-        endpoint: "https://bk9.fun/ai/deepseek-r1?q=",
+      talkai: {
+        name: "TalkAI",
+        endpoint: "https://bit-x-apis.vercel.app/talkai?q=",
         responseType: "text",
-        responsePath: "BK9.content",
         processResponse: function(data) {
-          let response = Array.isArray(data[this.responsePath]) ? 
-                         data[this.responsePath].join(" ") : 
-                         data[this.responsePath];
-          return response;
+          return replaceAINames(data.result || "");
         }
       },
-      
-      
-      llama: {
-        name: "Llama",
-        endpoint: "https://bk9.fun/ai/llama?q=",
+      whitecream: {
+        name: "Whitecream",
+        endpoint: "https://bit-x-apis.vercel.app/writecream?q=",
         responseType: "text",
-        responsePath: "BK9",
         processResponse: function(data) {
-          let response = Array.isArray(data[this.responsePath]) ? 
-                         data[this.responsePath].join(" ") : 
-                         data[this.responsePath];
-          return replaceAINames(response);
+          return replaceAINames(data.result || "");
         }
       },
-      "jeeves-chat": {
-        name: "Jeeves",
-        endpoint: "https://bk9.fun/ai/jeeves-chat?q=",
+      dolphin: {
+        name: "Dolphin",
+        endpoint: "https://bit-x-apis.vercel.app/dolphin?q=",
         responseType: "text",
-        responsePath: "BK9",
         processResponse: function(data) {
-          let response = Array.isArray(data[this.responsePath]) ? 
-                         data[this.responsePath].join(" ") : 
-                         data[this.responsePath];
-          return replaceAINames(response);
+          return replaceAINames(data.result || "");
         }
       },
-      maths: {
-        name: "Maths",
-        endpoint: "https://bk9.fun/ai/mathssolve?q=",
+      notegpt: {
+        name: "NoteGPT",
+        endpoint: "https://bit-x-apis.vercel.app/notegpt?q=",
         responseType: "text",
-        responsePath: "BK9",
         processResponse: function(data) {
-          let response = Array.isArray(data[this.responsePath]) ? 
-                         data[this.responsePath].join(" ") : 
-                         data[this.responsePath];
-          return replaceAINames(response);
+          return replaceAINames(data.result || "");
         }
       },
-      
-      aoyo: {
-        name: "Aoyo",
-        endpoint: "https://bk9.fun/ai/Aoyo?q=",
-        responseType: "text",
-        responsePath: "BK9",
-        processResponse: function(data) {
-          let response = Array.isArray(data[this.responsePath]) ? 
-                         data[this.responsePath].join(" ") : 
-                         data[this.responsePath];
-          return replaceAINames(response);
-        }
-      },
-      
-      
-      gemini2: {
-        name: "Gemini+",
-        endpoint: "https://bk9.fun/ai/google-thinking?q=",
-        responseType: "text",
-        responsePath: "BK9",
-        processResponse: function(data) {
-          let response = Array.isArray(data[this.responsePath]) ? 
-                         data[this.responsePath].join(" ") : 
-                         data[this.responsePath];
-          return replaceAINames(response);
-        }
-      },
-      
-      flux: {
-        name: "flux",
-        endpoint: "https://bk9.fun/ai/fluximg?q=",
-        responseType: "image",
-        responsePath: "BK9[0]", // First image in array
-        processResponse: function(data) {
-          // For images, we return the URL directly
-          const pathParts = this.responsePath.replace(/\]/g, '').split('[');
-          let result = data;
-          for (const part of pathParts) {
-            if (part) result = result[part];
-          }
-          return result;
-        }
-      },
-      magicstudio: {
-        name: "magicstudio",
-        endpoint: "https://bk9.fun/ai/magicstudio?prompt=",
-        responseType: "direct", // Special handling - don't fetch, use URL directly
+      zonerai: {
+        name: "ZonerAI",
+        endpoint: "https://bit-x-apis.vercel.app/aiimg2?q=",
+        responseType: "direct",
         processResponse: function(prompt) {
-          // For direct image generation, we construct the image URL
-          return `${this.endpoint}${encodeURIComponent(prompt)}`;
+          return `https://bit-x-apis.vercel.app/aiimg2?q=${encodeURIComponent(prompt)}`;
         }
       }
     };
 
-    let currentModel = "elixa";
+    let currentModel = "elixa";    
+        
+    
     let typingInterval = null;
     let isTyping = false;
     let currentRequest = null;
