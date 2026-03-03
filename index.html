@@ -9,24 +9,19 @@
   <link href="badu.css" rel="stylesheet">
 </head>
 <body>
-
       <div class="header-controls">
       <div>
         <button class="control-btn" id="dropdownToggle">
           <i class="fa-solid fa-caret-down"></i>
-          <span id="currentModel">Elixa </span>
+          <span id="currentModel">Elixa</span>
         </button>
         <div class="dropdown" id="dropdownMenu">
-            <div class="dropdown-item" data-model="elixa">Elixa<i class="fa-solid fa-heart"></i></div>
-          <div class="dropdown-item" data-model="gemini">Gemini</div>
-          <div class="dropdown-item" data-model="gemini2">Gemini<i class="fa-solid fa-plus"></i></div>
-          <div class="dropdown-item" data-model="llama">Llama</div>
-          <div class="dropdown-item" data-model="jeeves-chat">Jeeves</div>
-                
-          <div class="dropdown-item" data-model="aoyo">Aoyo</div>
-          <div class="dropdown-item" data-model="maths">Maths</div>
-          <div class="dropdown-item" data-model="flux">Flux <i class="fa-solid fa-image"></i></div>
-          <div class="dropdown-item" data-model="magicstudio">Magicstudio <i class="fa-solid fa-image"></i></div>
+          <div class="dropdown-item" data-model="elixa">Elixa <i class="fa-solid fa-heart"></i></div>
+          <div class="dropdown-item" data-model="talkai">TalkAI <i class="fa-solid fa-robot"></i></div>
+          <div class="dropdown-item" data-model="whitecream">Whitecream <i class="fa-solid fa-pen"></i></div>
+          <div class="dropdown-item" data-model="dolphin">Dolphin <i class="fa-solid fa-fish"></i></div>
+          <div class="dropdown-item" data-model="notegpt">NoteGPT <i class="fa-solid fa-note-sticky"></i></div>
+          <div class="dropdown-item" data-model="zonerai">ZonerAI <i class="fa-solid fa-image"></i></div>
         </div>
       </div>
       <div>
@@ -45,12 +40,10 @@
     <div class="eye" id="eye1"></div>
     <div class="eye" id="eye2"></div>
   </div>
-
   <div class="chat-box">
     <input type="text" id="userInput" placeholder="Talk to AI..." aria-label="Type your message here" />
     <button id="sendButton" onclick="sendMessage()">Send</button>
   </div>
-
   <div class="response" id="response"></div>
   <button class="stop-button" id="stopButton" style="display: none;"><i class="fa-solid fa-circle-stop"></i></button>
   <script src="ai.js"></script>
