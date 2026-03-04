@@ -6,46 +6,939 @@
   <meta name="description" content="Interactive AI with animated eyes that responds to your messages">
   <title>Elixa AI Eyes</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <link href="badu.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500&display=swap');
+
+    :root {
+      --primary-color: #1a1a1a;
+      --secondary-color: #4a4a4a;
+      --accent-color: #0077cc;
+      --text-color: #333;
+      --light-gray: #f0f0f0;
+      --border-radius: 8px;
+      --transition-speed: 0.2s;
+      --eye-color: #000;
+      --eye-reflection: white;
+      --bg-color: white;
+      --input-bg: #f5f5f5;
+      --input-text: #333;
+      --chat-user-bg: #1a1a1a;
+      --chat-user-text: #fff;
+      --chat-ai-bg: #f0f0f0;
+      --chat-ai-text: #333;
+    }
+
+    body.dark-mode {
+      --primary-color: white;
+      --secondary-color: #cccccc;
+      --accent-color: white;
+      --text-color: white;
+      --light-gray: #2a2a2a;
+      --border-radius: 8px;
+      --transition-speed: 0.2s;
+      --eye-color: white;
+      --eye-reflection: #777;
+      --bg-color: #121212;
+      --input-bg: #2a2a2a;
+      --input-text: #ffffff;
+      --chat-user-bg: #ffffff;
+      --chat-user-text: #121212;
+      --chat-ai-bg: #2a2a2a;
+      --chat-ai-text: #ffffff;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Source Code Pro', monospace;
+      color: var(--text-color);
+      padding: 20px;
+      box-sizing: border-box;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 40px;
+    }
+
+    .header-controls {
+      position: absolute;
+      top: 20px;
+      width: 90%;
+      max-width: 800px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .control-btn {
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 5px;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 40px;
+      background: var(--bg-color);
+      border: 1px solid var(--light-gray);
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 100;
+      display: none;
+      min-width: 200px;
+    }
+
+    .dropdown.show { display: block; }
+
+    .dropdown-item {
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: background-color var(--transition-speed);
+      color: var(--text-color);
+    }
+
+    .dropdown-item:hover { background-color: var(--light-gray); }
+
+    .dropdown-item.active {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    /* ── EYES ── */
+    .eyes-container {
+      display: flex;
+      height: 80px;
+      gap: 100px;
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .eye {
+      width: 150px;
+      height: 70px;
+      background: var(--eye-color);
+      border-radius: 10px;
+      transition: all var(--transition-speed) ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .eye::before {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: var(--eye-reflection);
+      border-radius: 40%;
+      top: calc(50% + var(--eye-offset-y, 0px));
+      left: calc(50% + var(--eye-offset-x, 0px));
+      transform: translate(-50%, -50%);
+      opacity: 0.2;
+    }
+
+    .eye.happy::before {
+      border-radius: 0;
+      width: 60px; height: 30px;
+      top: 60%;
+      transform: translate(-50%, 0) rotate(0deg);
+    }
+
+    .eye.sad::before {
+      border-radius: 0;
+      width: 60px; height: 30px;
+      top: 30%;
+      transform: translate(-50%, 0) rotate(180deg);
+    }
+
+    .eye.angry::before {
+      border-radius: 0;
+      width: 60px; height: 15px;
+      top: 50%;
+      transform: translate(-50%, 0) rotate(0deg);
+    }
+
+    .eye.love::before {
+      content: '❤️';
+      font-size: 30px;
+      background: transparent;
+      opacity: 1;
+      width: auto; height: auto;
+    }
+
+    .eye.waving::before { animation: wave 1s infinite; }
+
+    @keyframes wave {
+      0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+      25%       { transform: translate(-50%, -50%) rotate(15deg); }
+      75%       { transform: translate(-50%, -50%) rotate(-15deg); }
+    }
+
+    .eye.touched { animation: eye-flinch 0.3s ease; }
+
+    @keyframes eye-flinch {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(0.8); }
+      100% { transform: scale(1); }
+    }
+
+    .eye.closed {
+      height: 20px;
+      margin-top: 40px;
+      border-radius: 50px;
+    }
+
+    /* ── CHAT BOX (input area) ── */
+    .chat-box {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    /* FIX: input text visible in dark mode */
+    input[type="text"] {
+      padding: 12px 15px;
+      font-size: 1rem;
+      font-family: 'Source Code Pro', monospace;
+      border: none;
+      border-radius: var(--border-radius);
+      width: 100%;
+      transition: border-color 0.2s ease, background-color 0.3s, color 0.3s;
+      background-color: var(--input-bg);
+      color: var(--input-text);
+    }
+
+    input[type="text"]::placeholder {
+      color: color-mix(in srgb, var(--input-text) 50%, transparent);
+    }
+
+    input[type="text"]:focus { outline: none; }
+
+    button {
+      padding: 12px 20px;
+      font-size: 1rem;
+      background-color: var(--primary-color);
+      color: var(--bg-color);
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      white-space: nowrap;
+    }
+
+    button:hover  { background-color: var(--secondary-color); }
+    button:active { transform: scale(0.98); }
+
+    /* ── EYE-MODE RESPONSE ── */
+    .response {
+      margin-top: 30px;
+      max-width: 500px;
+      text-align: center;
+      padding: 15px;
+      border-radius: var(--border-radius);
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .response b {
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    /* ── CHAT MODE UI ── */
+    #chatWindow {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      max-width: 500px;
+      height: 55vh;
+      overflow-y: auto;
+      border: 1px solid var(--light-gray);
+      border-radius: var(--border-radius);
+      padding: 12px;
+      box-sizing: border-box;
+      gap: 10px;
+      margin-bottom: 14px;
+      background: var(--bg-color);
+      transition: background-color 0.3s;
+      scroll-behavior: smooth;
+    }
+
+    .chat-bubble {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .chat-bubble.user {
+      align-self: flex-end;
+      background: var(--chat-user-bg);
+      color: var(--chat-user-text);
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-bubble.ai {
+      align-self: flex-start;
+      background: var(--chat-ai-bg);
+      color: var(--chat-ai-text);
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-bubble.ai.loading-bubble {
+      opacity: 0.6;
+      font-style: italic;
+    }
+
+    /* ── LOADING / STOP / MISC ── */
+    .loading {
+      position: relative;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      border: 3px solid rgba(0,0,0,0.1);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+
+    .stop-button {
+      margin-top: 15px;
+      background-color: #ff4444;
+      padding: 8px 15px;
+      font-size: 0.9rem;
+    }
+
+    .stop-button:hover { background-color: #cc0000; }
+
+    .menu-content { text-align: left; width: 100%; }
+    .menu-content img { max-width: 100%; border-radius: 8px; margin: 10px 0; }
+    .menu-content button {
+      display: block; width: 100%; margin: 5px 0;
+      text-align: left; padding: 10px;
+      background-color: var(--light-gray);
+      color: var(--text-color);
+    }
+    .menu-content button:hover { background-color: #e0e0e0; }
+
+    .generated-image {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 15px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) {
+      .eyes-container { gap: 50px; }
+      .eye { width: 80px; height: 80px; }
+      .eye.closed { height: 16px; margin-top: 32px; }
+      .chat-box { flex-direction: column; }
+      button { width: 100%; }
+    }
+  </style>
 </head>
 <body>
-      <div class="header-controls">
-      <div>
-        <button class="control-btn" id="dropdownToggle">
-          <i class="fa-solid fa-caret-down"></i>
-          <span id="currentModel">Elixa</span>
-        </button>
-        <div class="dropdown" id="dropdownMenu">
-          <div class="dropdown-item" data-model="elixa">Elixa <i class="fa-solid fa-heart"></i></div>
-          <div class="dropdown-item" data-model="talkai">TalkAI <i class="fa-solid fa-robot"></i></div>
-          <div class="dropdown-item" data-model="whitecream">Whitecream <i class="fa-solid fa-pen"></i></div>
-          <div class="dropdown-item" data-model="dolphin">Dolphin <i class="fa-solid fa-fish"></i></div>
-          <div class="dropdown-item" data-model="notegpt">NoteGPT <i class="fa-solid fa-note-sticky"></i></div>
-          <div class="dropdown-item" data-model="zonerai">ZonerAI <i class="fa-solid fa-image"></i></div>
-        </div>
-      </div>
-      <div>
-        <button class="control-btn" id="darkModeToggle" title="Toggle Dark Mode">
-          <i class="fas fa-moon"></i>
-        </button>
-        <button class="control-btn" id="chatModeToggle" title="Toggle Chat Mode">
-          <i class="fas fa-comment"></i>
-        </button>
+
+  <div class="header-controls">
+    <div>
+      <button class="control-btn" id="dropdownToggle">
+        <i class="fa-solid fa-caret-down"></i>
+        <span id="currentModel">Elixa</span>
+      </button>
+      <div class="dropdown" id="dropdownMenu">
+        <div class="dropdown-item" data-model="elixa">Elixa <i class="fa-solid fa-heart"></i></div>
+        <div class="dropdown-item" data-model="talkai">TalkAI <i class="fa-solid fa-robot"></i></div>
+        <div class="dropdown-item" data-model="whitecream">Whitecream <i class="fa-solid fa-pen"></i></div>
+        <div class="dropdown-item" data-model="dolphin">Dolphin <i class="fa-solid fa-fish"></i></div>
+        <div class="dropdown-item" data-model="notegpt">NoteGPT <i class="fa-solid fa-note-sticky"></i></div>
+        <div class="dropdown-item" data-model="zonerai">ZonerAI <i class="fa-solid fa-image"></i></div>
       </div>
     </div>
-  
+    <div>
+      <button class="control-btn" id="darkModeToggle" title="Toggle Dark Mode">
+        <i class="fas fa-moon"></i>
+      </button>
+      <button class="control-btn" id="chatModeToggle" title="Toggle Chat Mode">
+        <i class="fas fa-comment"></i>
+      </button>
+    </div>
+  </div>
+
   <h1>Elixa AI</h1>
-  
+
   <div class="eyes-container">
     <div class="eye" id="eye1"></div>
     <div class="eye" id="eye2"></div>
   </div>
+
+  <!-- Chat mode conversation window -->
+  <div id="chatWindow"></div>
+
   <div class="chat-box">
     <input type="text" id="userInput" placeholder="Talk to AI..." aria-label="Type your message here" />
     <button id="sendButton" onclick="sendMessage()">Send</button>
   </div>
+
   <div class="response" id="response"></div>
-  <button class="stop-button" id="stopButton" style="display: none;"><i class="fa-solid fa-circle-stop"></i></button>
-  <script src="ai.js"></script>
+  <button class="stop-button" id="stopButton" style="display:none;"><i class="fa-solid fa-circle-stop"></i></button>
+
+<script>
+  // ── DOM refs ──────────────────────────────────────────────────────────────
+  const eye1              = document.getElementById('eye1');
+  const eye2              = document.getElementById('eye2');
+  const sendButton        = document.getElementById('sendButton');
+  const userInput         = document.getElementById('userInput');
+  const responseDiv       = document.getElementById('response');
+  const dropdownToggle    = document.getElementById('dropdownToggle');
+  const dropdownMenu      = document.getElementById('dropdownMenu');
+  const currentModelEl    = document.getElementById('currentModel');
+  const dropdownItems     = document.querySelectorAll('.dropdown-item');
+  const stopButton        = document.getElementById('stopButton');
+  const darkModeToggle    = document.getElementById('darkModeToggle');
+  const chatModeToggle    = document.getElementById('chatModeToggle');
+  const chatWindow        = document.getElementById('chatWindow');
+  const body              = document.body;
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  let currentModel      = 'elixa';
+  let typingInterval    = null;
+  let isTyping          = false;
+  let currentRequest    = null;
+  let isDarkMode        = false;
+  let isChatMode        = false;
+  let loveInterval      = null;
+  let waveInterval      = null;
+
+  // NoteGPT persistent conversation id (kept for full session)
+  let notegptConversationId = generateUUID();
+
+  // ── UUID generator (no external lib) ─────────────────────────────────────
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  // ── Custom responses ──────────────────────────────────────────────────────
+  const customResponses = {
+    menu: {
+      action: 'showHTML',
+      content: `
+        <div class="menu-content">
+          <h3>Elixa AI Menu</h3>
+          <p>Select an option below or type your question:</p>
+          <button onclick="handleMenuOption('features')">Features</button>
+          <button onclick="handleMenuOption('commands')">Available Commands</button>
+          <button onclick="handleMenuOption('about')">About Elixa</button>
+          <button onclick="handleMenuOption('help')">Help</button>
+          <img src="https://placehold.co/400x200?text=Elixa+AI" alt="Elixa AI">
+        </div>`
+    },
+    features: {
+      action: 'showHTML',
+      content: `
+        <div class="menu-content">
+          <h3>Elixa AI Features</h3>
+          <ul>
+            <li>Natural language processing</li>
+            <li>Multiple AI models</li>
+            <li>Interactive eyes</li>
+            <li>Image generation</li>
+            <li>Math problem solving</li>
+            <li>Emotional expressions</li>
+            <li>Dark/Chat mode</li>
+          </ul>
+          <p>Type <b>menu</b> to return to the main menu.</p>
+        </div>`
+    },
+    commands: {
+      action: 'showHTML',
+      content: `
+        <div class="menu-content">
+          <h3>Available Commands</h3>
+          <ul>
+            <li><b>menu</b> – Show this menu</li>
+            <li><b>help</b> – Get help</li>
+            <li><b>about</b> – Learn about Elixa</li>
+            <li><b>clear</b> – Clear the chat</li>
+            <li><b>love</b> – Show love expression</li>
+            <li><b>wave</b> – Make me wave</li>
+            <li><b>color [color]</b> – Change eye color</li>
+          </ul>
+        </div>`
+    },
+    about: {
+      action: 'showText',
+      content: 'Elixa is an advanced AI assistant designed by Nethindu Thaminda Kodithuwakku to help with various tasks. It combines multiple AI models to provide the best possible responses.'
+    },
+    help: {
+      action: 'showText',
+      content: "You can ask me anything! Try questions about science, history, or request images. Type 'menu' to see options. Try commands like 'love', 'wave', or 'color red' to see special effects!"
+    },
+    clear: { action: 'clearChat',  content: '' },
+    love:  { action: 'showLove',   content: '' },
+    wave:  { action: 'showWave',   content: '' }
+  };
+
+  // ── AI models ─────────────────────────────────────────────────────────────
+  const aiModels = {
+    elixa: {
+      name: 'Elixa',
+      endpoint: 'https://bit-x-apis.vercel.app/talkai?q=',
+      responseType: 'text',
+      processResponse: d => replaceAINames(d.result || '')
+    },
+    talkai: {
+      name: 'TalkAI',
+      endpoint: 'https://bit-x-apis.vercel.app/talkai?q=',
+      responseType: 'text',
+      processResponse: d => replaceAINames(d.result || '')
+    },
+    whitecream: {
+      name: 'Whitecream',
+      endpoint: 'https://bit-x-apis.vercel.app/writecream?q=',
+      responseType: 'text',
+      processResponse: d => replaceAINames(d.result || '')
+    },
+    dolphin: {
+      name: 'Dolphin',
+      endpoint: 'https://bit-x-apis.vercel.app/dolphin?q=',
+      responseType: 'text',
+      processResponse: d => replaceAINames(d.answer || '')
+    },
+    notegpt: {
+      name: 'NoteGPT',
+      // We'll call the API directly with a persistent conversation_id
+      endpoint: null,
+      responseType: 'text',
+      processResponse: d => replaceAINames(d.result || '')
+    },
+    zonerai: {
+      name: 'ZonerAI',
+      endpoint: 'https://bit-x-apis.vercel.app/aiimg2?q=',
+      responseType: 'direct',
+      processResponse: prompt => `https://bit-x-apis.vercel.app/aiimg2?q=${encodeURIComponent(prompt)}`
+    }
+  };
+
+  // ── NoteGPT direct fetch (persistent conversation_id) ────────────────────
+  async function fetchNoteGPT(message, signal) {
+    const response = await fetch('https://notegpt.io/api/v2/chat/stream', {
+      method: 'POST',
+      signal,
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Origin': 'https://notegpt.io',
+        'Referer': 'https://notegpt.io/'
+      },
+      body: JSON.stringify({
+        message,
+        language: 'auto',
+        model: 'gpt-4.1-mini',
+        tone: 'default',
+        length: 'moderate',
+        chat_mode: 'standard',
+        conversation_id: notegptConversationId,
+        image_urls: []
+      })
+    });
+
+    if (!response.ok) throw new Error(`NoteGPT API failed: ${response.status}`);
+
+    const rawData = await response.text();
+    let fullText = '';
+    rawData.split('\n').forEach(line => {
+      if (line.startsWith('data: ')) {
+        try {
+          const parsed = JSON.parse(line.replace('data: ', '').trim());
+          if (parsed.text) fullText += parsed.text;
+        } catch (_) {}
+      }
+    });
+
+    return { status: true, powered: 'By BitX TEAM🖥️✨', conversation_id: notegptConversationId, result: fullText.trim() };
+  }
+
+  // ── Dropdown ──────────────────────────────────────────────────────────────
+  dropdownToggle.addEventListener('click', () => dropdownMenu.classList.toggle('show'));
+
+  document.addEventListener('click', e => {
+    if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target))
+      dropdownMenu.classList.remove('show');
+  });
+
+  dropdownItems.forEach(item => {
+    item.addEventListener('click', () => {
+      currentModel = item.dataset.model;
+      currentModelEl.textContent = aiModels[currentModel].name;
+      dropdownItems.forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      dropdownMenu.classList.remove('show');
+    });
+  });
+
+  // ── Dark mode ─────────────────────────────────────────────────────────────
+  darkModeToggle.addEventListener('click', () => {
+    isDarkMode = !isDarkMode;
+    body.classList.toggle('dark-mode', isDarkMode);
+    darkModeToggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    darkModeToggle.title = isDarkMode ? 'Toggle Light Mode' : 'Toggle Dark Mode';
+  });
+
+  // ── Chat mode ─────────────────────────────────────────────────────────────
+  chatModeToggle.addEventListener('click', () => {
+    isChatMode = !isChatMode;
+    chatModeToggle.innerHTML = isChatMode ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-comment"></i>';
+    chatModeToggle.title = isChatMode ? 'Toggle Eye Mode' : 'Toggle Chat Mode';
+
+    if (isChatMode) {
+      document.querySelector('.eyes-container').style.display = 'none';
+      document.querySelector('h1').textContent = 'Elixa Chat';
+      chatWindow.style.display = 'flex';
+      responseDiv.style.display = 'none';
+    } else {
+      document.querySelector('.eyes-container').style.display = 'flex';
+      document.querySelector('h1').textContent = 'Elixa AI';
+      chatWindow.style.display = 'none';
+      responseDiv.style.display = 'flex';
+    }
+  });
+
+  // ── Eyes helpers ──────────────────────────────────────────────────────────
+  function blinkEyes() {
+    eye1.classList.add('closed'); eye2.classList.add('closed');
+    setTimeout(() => { eye1.classList.remove('closed'); eye2.classList.remove('closed'); }, 150);
+  }
+
+  function scheduleBlink() {
+    const t = 2000 + Math.random() * 3000 + (Math.random() > 0.7 ? 1000 : 0);
+    setTimeout(() => { blinkEyes(); scheduleBlink(); }, t);
+  }
+  scheduleBlink();
+
+  const eyeball1 = document.querySelector('.eye#eye1');
+  const eyeball2 = document.querySelector('.eye#eye2');
+
+  function moveEyeballs(x, y) {
+    const r1 = eyeball1.getBoundingClientRect();
+    const r2 = eyeball2.getBoundingClientRect();
+    const cx = (r1.left + r1.width/2 + r2.left + r2.width/2) / 2;
+    const cy = (r1.top + r1.height/2 + r2.top + r2.height/2) / 2;
+    const angle = Math.atan2(y - cy, x - cx);
+    const dist  = Math.min(10, Math.hypot(x - cx, y - cy));
+    [eyeball1, eyeball2].forEach(e => {
+      e.style.setProperty('--eye-offset-x', `${Math.cos(angle) * dist}px`);
+      e.style.setProperty('--eye-offset-y', `${Math.sin(angle) * dist}px`);
+    });
+  }
+
+  document.addEventListener('mousemove', e => moveEyeballs(e.pageX, e.pageY));
+  document.addEventListener('touchmove', e => {
+    if (e.touches.length > 0) moveEyeballs(e.touches[0].pageX, e.touches[0].pageY);
+  }, { passive: true });
+
+  function detectEmotion(msg) {
+    const m = msg.toLowerCase();
+    if (/(fun|happy|joy|smile)/.test(m))    return 'happy';
+    if (/(sad|cry|depress|tear)/.test(m))   return 'sad';
+    if (/(angry|mad|annoy)/.test(m))        return 'angry';
+    if (/(love|heart|like)/.test(m))        return 'love';
+    return 'neutral';
+  }
+
+  function detectColors(msg) {
+    const colorMap = { red:'#ff0000', blue:'#0000ff', green:'#00ff00', yellow:'#ffff00',
+      purple:'#800080', pink:'#ffc0cb', orange:'#ffa500', white:'#ffffff',
+      black:'#000000', gray:'#808080' };
+    const cm = msg.match(/color\s+(\w+)/i);
+    if (cm && colorMap[cm[1].toLowerCase()]) return colorMap[cm[1].toLowerCase()];
+    for (const [c, h] of Object.entries(colorMap)) if (msg.toLowerCase().includes(c)) return h;
+    return null;
+  }
+
+  function showLove() {
+    clearLoveEffect(); clearWaveEffect();
+    [eye1, eye2].forEach(e => e.classList.add('love'));
+    loveInterval = setTimeout(clearLoveEffect, 3000);
+  }
+  function clearLoveEffect() {
+    if (loveInterval) { clearTimeout(loveInterval); loveInterval = null; }
+    [eye1, eye2].forEach(e => e.classList.remove('love'));
+  }
+
+  function showWave() {
+    clearLoveEffect(); clearWaveEffect();
+    [eye1, eye2].forEach(e => e.classList.add('waving'));
+    waveInterval = setTimeout(clearWaveEffect, 3000);
+  }
+  function clearWaveEffect() {
+    if (waveInterval) { clearTimeout(waveInterval); waveInterval = null; }
+    [eye1, eye2].forEach(e => e.classList.remove('waving'));
+  }
+
+  function setupTouchPrevention() {
+    [eye1, eye2].forEach(eye => {
+      eye.addEventListener('touchstart', e => {
+        e.preventDefault();
+        eye.classList.add('touched');
+        setTimeout(() => eye.classList.remove('touched'), 300);
+        const tx = e.touches[0].clientX, ty = e.touches[0].clientY;
+        const r = eye.getBoundingClientRect();
+        const angle = Math.atan2(r.top + r.height/2 - ty, r.left + r.width/2 - tx);
+        const dist  = Math.min(20, Math.hypot(r.left + r.width/2 - tx, r.top + r.height/2 - ty));
+        eye.style.setProperty('--eye-offset-x', `${Math.cos(angle) * dist}px`);
+        eye.style.setProperty('--eye-offset-y', `${Math.sin(angle) * dist}px`);
+      }, { passive: false });
+    });
+  }
+  setupTouchPrevention();
+
+  // ── Text helpers ──────────────────────────────────────────────────────────
+  function replaceAINames(text) {
+    if (!text) return '';
+    ['BK9','Gemini','AI','Assistant','Chatbot'].forEach(n => {
+      text = text.replace(new RegExp(n, 'gi'), 'Elixa');
+    });
+    return text;
+  }
+
+  function formatTextWithBold(text) {
+    return (text || '').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+  }
+
+  // ── Custom response processor ─────────────────────────────────────────────
+  window.handleMenuOption = option => { if (customResponses[option]) processCustomResponse(option); };
+
+  function processCustomResponse(key) {
+    const r = customResponses[key];
+    if (r.action === 'showHTML')    { responseDiv.innerHTML = r.content; appendChatBubble('ai', r.content, true); }
+    else if (r.action === 'showText') { responseDiv.innerHTML = formatTextWithBold(r.content); appendChatBubble('ai', r.content); }
+    else if (r.action === 'clearChat') { responseDiv.innerHTML = ''; chatWindow.innerHTML = ''; }
+    else if (r.action === 'showLove') { showLove(); const t = '❤️ Sending love! ❤️'; responseDiv.innerHTML = `<b>${t}</b>`; appendChatBubble('ai', t); }
+    else if (r.action === 'showWave') { showWave(); const t = '👋 Waving hello! 👋'; responseDiv.innerHTML = `<b>${t}</b>`; appendChatBubble('ai', t); }
+  }
+
+  // ── Chat window helpers ───────────────────────────────────────────────────
+  function appendChatBubble(who, html, isHTML = false) {
+    if (!isChatMode) return null;
+    const el = document.createElement('div');
+    el.className = `chat-bubble ${who}`;
+    if (isHTML) el.innerHTML = html;
+    else el.textContent = html;
+    chatWindow.appendChild(el);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+    return el;
+  }
+
+  function appendLoadingBubble() {
+    if (!isChatMode) return null;
+    const el = document.createElement('div');
+    el.className = 'chat-bubble ai loading-bubble';
+    el.textContent = 'Thinking…';
+    chatWindow.appendChild(el);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+    return el;
+  }
+
+  // ── Stop ──────────────────────────────────────────────────────────────────
+  function stopResponse() {
+    if (typingInterval) { clearInterval(typingInterval); typingInterval = null; }
+    isTyping = false;
+    stopButton.style.display = 'none';
+    if (currentRequest) { currentRequest.abort(); currentRequest = null; }
+    clearLoveEffect(); clearWaveEffect();
+  }
+
+  // ── Display image ─────────────────────────────────────────────────────────
+  function displayImage(url) {
+    responseDiv.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = url; img.alt = 'Generated Image'; img.className = 'generated-image';
+    responseDiv.appendChild(img);
+    if (isChatMode) {
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble ai';
+      const i2 = document.createElement('img');
+      i2.src = url; i2.alt = 'Generated Image'; i2.className = 'generated-image';
+      bubble.appendChild(i2);
+      chatWindow.appendChild(bubble);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+  }
+
+  // ── Typewriter for eye-mode ───────────────────────────────────────────────
+  function typeResponse(text) {
+    let i = 0;
+    responseDiv.innerHTML = '';
+    const speed = 25 + Math.random() * 30;
+    isTyping = true;
+    const temp = document.createElement('div');
+    typingInterval = setInterval(() => {
+      if (i < text.length && isTyping) {
+        temp.innerHTML = text.substring(0, i + 1);
+        responseDiv.innerHTML = temp.innerHTML;
+        i++;
+        if (i % 15 === 0 && Math.random() > 0.7) blinkEyes();
+        if (i % 20 === 0 && Math.random() < 0.03) showWave();
+      } else {
+        clearInterval(typingInterval); typingInterval = null; isTyping = false;
+        stopButton.style.display = 'none';
+      }
+    }, speed);
+  }
+
+  // ── Typewriter for chat-mode bubble ──────────────────────────────────────
+  function typeIntoBubble(bubble, text) {
+    let i = 0;
+    bubble.textContent = '';
+    bubble.classList.remove('loading-bubble');
+    const speed = 18 + Math.random() * 20;
+    isTyping = true;
+    typingInterval = setInterval(() => {
+      if (i < text.length && isTyping) {
+        bubble.textContent = text.substring(0, i + 1);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        i++;
+        if (i % 15 === 0 && Math.random() > 0.7) blinkEyes();
+      } else {
+        clearInterval(typingInterval); typingInterval = null; isTyping = false;
+        stopButton.style.display = 'none';
+      }
+    }, speed);
+  }
+
+  // ── Main send ─────────────────────────────────────────────────────────────
+  async function sendMessage() {
+    const raw     = userInput.value.trim();
+    const message = raw.toLowerCase();
+    if (!raw) { userInput.focus(); return; }
+
+    // Custom commands
+    if (customResponses[message]) {
+      if (isChatMode) appendChatBubble('user', raw);
+      processCustomResponse(message);
+      userInput.value = ''; userInput.focus(); return;
+    }
+
+    // Color command
+    const color = detectColors(raw);
+    if (color) {
+      [eye1, eye2].forEach(e => e.style.backgroundColor = color);
+      const t = `Changed eye color to ${raw.match(/color\s+(\w+)/i)[1]}!`;
+      responseDiv.innerHTML = `<b>${t}</b>`;
+      if (isChatMode) { appendChatBubble('user', raw); appendChatBubble('ai', t); }
+      userInput.value = ''; userInput.focus(); return;
+    }
+
+    sendButton.disabled = true;
+    stopButton.style.display = 'block';
+    blinkEyes();
+
+    // Eye emotion
+    const emotion = detectEmotion(raw);
+    [eye1, eye2].forEach(e => {
+      e.className = 'eye';
+      if (emotion !== 'neutral') e.classList.add(emotion);
+    });
+    if (Math.random() < 0.05) showLove();
+
+    // Chat mode: add user bubble + loading bubble
+    let loadingBubble = null;
+    if (isChatMode) {
+      appendChatBubble('user', raw);
+      loadingBubble = appendLoadingBubble();
+      responseDiv.style.display = 'none';
+    } else {
+      responseDiv.innerHTML = '<span class="loading">Thinking</span>';
+    }
+
+    const controller = new AbortController();
+    currentRequest   = controller;
+
+    try {
+      const modelConfig = aiModels[currentModel];
+
+      // Direct image generation
+      if (modelConfig.responseType === 'direct') {
+        const imageUrl = modelConfig.processResponse(raw);
+        if (loadingBubble) loadingBubble.remove();
+        displayImage(imageUrl);
+        return;
+      }
+
+      let result;
+
+      if (currentModel === 'notegpt') {
+        // Direct NoteGPT call with persistent conversation_id
+        result = await fetchNoteGPT(raw, controller.signal);
+      } else {
+        const endpoint = modelConfig.endpoint + encodeURIComponent(raw);
+        const resp = await fetch(endpoint, { signal: controller.signal });
+        if (!resp.ok) throw new Error(`API request failed: ${resp.status}`);
+        result = await resp.json();
+      }
+
+      currentRequest = null;
+
+      let processedText = modelConfig.processResponse(result);
+      processedText     = formatTextWithBold(processedText);
+
+      if (isChatMode && loadingBubble) {
+        // Strip HTML bold for plain bubble text; keep raw processed for eye-mode
+        const plainText = processedText.replace(/<b>(.*?)<\/b>/g, '$1');
+        typeIntoBubble(loadingBubble, plainText);
+      } else {
+        typeResponse(processedText);
+      }
+
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Error:', err);
+        const msg = 'Oops! Something went wrong. Please try again.';
+        if (loadingBubble) { loadingBubble.classList.remove('loading-bubble'); loadingBubble.textContent = msg; }
+        else responseDiv.textContent = msg;
+      } else {
+        if (loadingBubble) loadingBubble.remove();
+      }
+    } finally {
+      sendButton.disabled = false;
+      userInput.value     = '';
+      userInput.focus();
+      currentRequest      = null;
+      if (!isTyping) stopButton.style.display = 'none';
+    }
+  }
+
+  // ── Input listeners ───────────────────────────────────────────────────────
+  userInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+  stopButton.addEventListener('click', stopResponse);
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  userInput.focus();
+  document.querySelector(`.dropdown-item[data-model="${currentModel}"]`).classList.add('active');
+</script>
 </body>
 </html>
